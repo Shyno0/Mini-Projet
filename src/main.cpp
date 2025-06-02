@@ -1,97 +1,61 @@
-#include "lvgl.h"
+#include <Arduino.h>
+#include <Wire.h>
 
-static void event_handler(lv_event_t * e)
-{
-    lv_event_code_t code = lv_event_get_code(e);
+#define MPU6050_ADDR 0x68
 
-    if(code == LV_EVENT_CLICKED) {
-        LV_LOG_USER("Clicked");
-    }
-    else if(code == LV_EVENT_VALUE_CHANGED) {
-        LV_LOG_USER("Toggled");
-    }
-}
+void setup() {
+  Serial.begin(115200);
+  delay(2000);
+  Serial.println("Initialisation...");
 
-void testLvgl()
-{
-  // Initialisations générales
-  lv_obj_t * label;
+  Wire.begin();
+  Serial.println("I2C lancé");
 
-  lv_obj_t * btn1 = lv_button_create(lv_screen_active());
-  lv_obj_add_event_cb(btn1, event_handler, LV_EVENT_ALL, NULL);
-  lv_obj_align(btn1, LV_ALIGN_CENTER, 0, -40);
-  lv_obj_remove_flag(btn1, LV_OBJ_FLAG_PRESS_LOCK);
-
-  label = lv_label_create(btn1);
-  lv_label_set_text(label, "Button");
-  lv_obj_center(label);
-
-  lv_obj_t * btn2 = lv_button_create(lv_screen_active());
-  lv_obj_add_event_cb(btn2, event_handler, LV_EVENT_ALL, NULL);
-  lv_obj_align(btn2, LV_ALIGN_CENTER, 0, 40);
-  lv_obj_add_flag(btn2, LV_OBJ_FLAG_CHECKABLE);
-  lv_obj_set_height(btn2, LV_SIZE_CONTENT);
-
-  label = lv_label_create(btn2);
-  lv_label_set_text(label, "Toggle");
-  lv_obj_center(label);
-}
-
-#ifdef ARDUINO
-
-#include "lvglDrivers.h"
-
-// à décommenter pour tester la démo
-// #include "demos/lv_demos.h"
-
-void mySetup()
-{
-  // à décommenter pour tester la démo
-  // lv_demo_widgets();
-
-  // Initialisations générales
-  testLvgl();
-}
-
-void loop()
-{
-  // Inactif (pour mise en veille du processeur)
-}
-
-void myTask(void *pvParameters)
-{
-  // Init
-  TickType_t xLastWakeTime;
-  // Lecture du nombre de ticks quand la tâche débute
-  xLastWakeTime = xTaskGetTickCount();
-  while (1)
-  {
-    // Loop
-
-    // Endort la tâche pendant le temps restant par rapport au réveil,
-    // ici 200ms, donc la tâche s'effectue toutes les 200ms
-    vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(200)); // toutes les 200 ms
+  // Initialiser MPU6050 (wake up)
+  Wire.beginTransmission(MPU6050_ADDR);
+  Wire.write(0x6B);  // registre power management
+  Wire.write(0);     // sortir du mode sleep
+  byte error = Wire.endTransmission();
+  if (error == 0) {
+    Serial.println("MPU6050 réveillé");
+  } else {
+    Serial.print("Erreur init MPU6050: ");
+    Serial.println(error);
   }
 }
 
-#else
+void loop() {
+  // Demander lecture à partir du registre 0x3B (accélération X)
+  Wire.beginTransmission(MPU6050_ADDR);
+  Wire.write(0x3B);
+  if (Wire.endTransmission(false) != 0) { // restart condition
+    Serial.println("Erreur I2C read");
+    delay(1000);
+    return;
+  }
 
-#include "lvgl.h"
-#include "app_hal.h"
-#include <cstdio>
+  // Lire 14 octets: AccX(2), AccY(2), AccZ(2), Temp(2), GyroX(2), GyroY(2), GyroZ(2)
+  Wire.requestFrom(MPU6050_ADDR, 14);
+  if (Wire.available() < 14) {
+    Serial.println("Pas assez de données");
+    delay(1000);
+    return;
+  }
 
-int main(void)
-{
-  printf("LVGL Simulator\n");
-  fflush(stdout);
+  int16_t accX = Wire.read() << 8 | Wire.read();
+  int16_t accY = Wire.read() << 8 | Wire.read();
+  int16_t accZ = Wire.read() << 8 | Wire.read();
+  /*int16_t gyroX = Wire.read() << 8 | Wire.read();
+  int16_t gyroY = Wire.read() << 8 | Wire.read();
+  int16_t gyroZ = Wire.read() << 8 | Wire.read();*/
 
-  lv_init();
-  hal_setup();
+  Serial.print(" | Acc X:   "); Serial.print(accX);
+  Serial.print(" | Acc Y:  "); Serial.print(accY);
+  Serial.print(" | Acc Z:   "); Serial.println(accZ);
 
-  testLvgl();
+  /*Serial.print(" | Gyro X: "); Serial.print(gyroX);
+  Serial.print(" | Gyro Y: "); Serial.print(gyroY);
+  Serial.print(" | Gyro Z: "); Serial.println(gyroZ);*/
 
-  hal_loop();
-  return 0;
+  delay(1000);
 }
-
-#endif
