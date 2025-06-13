@@ -1,5 +1,6 @@
 {
     "files.associations": {
         "stm32746g_discovery_audio.h": "c"
-    }
+    },
+    "cmake.sourceDirectory": "C:/Users/burlo/Desktop/Mini projet/Mini-Projet/lib/lvgl"
 }
