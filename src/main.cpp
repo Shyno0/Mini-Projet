@@ -541,8 +541,8 @@ void mySetup() {
  * Gère le rafraîchissement de LVGL et introduit un petit délai.
  */
 void loop() {
-    lv_timer_handler(); // Gère tous les timers LVGL, les animations et le rafraîchissement de l'interface
-    delay(5);           // Petite pause pour ne pas saturer le processeur et laisser d'autres tâches s'exécuter
+    // lv_timer_handler(); // Gère tous les timers LVGL, les animations et le rafraîchissement de l'interface
+    // delay(5);           // Petite pause pour ne pas saturer le processeur et laisser d'autres tâches s'exécuter
 }
 
 /**
@@ -551,13 +551,13 @@ void loop() {
  * Elle ne fait rien d'autre que d'attendre pour libérer le processeur.
  * @param pvParameters Pointeur vers des paramètres de la tâche (non utilisé ici)
  */
-void myTask(void *pvParameters) {
-    while(1) {
-        // Cette tâche est maintenue pour satisfaire une référence possible de la bibliothèque lvglDrivers.
-        // Elle met en pause la tâche pendant 1000 millisecondes (1 seconde) avant de reprendre.
-        vTaskDelay(pdMS_TO_TICKS(1000));
-    }
-}
+// void myTask(void *pvParameters) {
+//     while(1) {
+//         // Cette tâche est maintenue pour satisfaire une référence possible de la bibliothèque lvglDrivers.
+//         // Elle met en pause la tâche pendant 1000 millisecondes (1 seconde) avant de reprendre.
+//         vTaskDelay(pdMS_TO_TICKS(1000));
+//     }
+// }
 
 /**
  * @brief Boucle principale du jeu, appelée régulièrement par un timer LVGL.
