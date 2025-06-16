@@ -16,6 +16,7 @@
 #define MAX_OBSTACLES 50        // Nombre maximum d'obstacles bleus simultanés
 #define OBSTACLE_SIZE 20        // Taille des obstacles bleus et du cube vert en pixels
 #define OBSTACLE_SPEED 1.5f     // Vitesse de déplacement des obstacles bleus
+// --- Définitions (Constantes du jeu) ---
 
 // --- Structures de données ---
 // Structure pour représenter un obstacle bleu
@@ -26,7 +27,7 @@ typedef struct {
     float dx;               // Vitesse de déplacement sur l'axe X
     float dy;               // Vitesse de déplacement sur l'axe Y
 } Obstacle;
-
+// --- Structures de données ---
 
 // --- Variables globales ---
 // Objets graphiques LVGL
@@ -541,23 +542,8 @@ void mySetup() {
  * Gère le rafraîchissement de LVGL et introduit un petit délai.
  */
 void loop() {
-    // lv_timer_handler(); // Gère tous les timers LVGL, les animations et le rafraîchissement de l'interface
-    // delay(5);           // Petite pause pour ne pas saturer le processeur et laisser d'autres tâches s'exécuter
-}
 
-/**
- * @brief Tâche de fond pour FreeRTOS.
- * Cette fonction est nécessaire si la bibliothèque lvglDrivers l'appelle, même si notre jeu ne l'utilise pas directement.
- * Elle ne fait rien d'autre que d'attendre pour libérer le processeur.
- * @param pvParameters Pointeur vers des paramètres de la tâche (non utilisé ici)
- */
-// void myTask(void *pvParameters) {
-//     while(1) {
-//         // Cette tâche est maintenue pour satisfaire une référence possible de la bibliothèque lvglDrivers.
-//         // Elle met en pause la tâche pendant 1000 millisecondes (1 seconde) avant de reprendre.
-//         vTaskDelay(pdMS_TO_TICKS(1000));
-//     }
-// }
+}
 
 /**
  * @brief Boucle principale du jeu, appelée régulièrement par un timer LVGL.
